@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  administrator
+  supervisor
+  operator
+  hunter
+}
+
+enum Status {
+  process
+  completed
+  finished
+}
+
+model Assignment {
+  id                String           @id @default(uuid())
+  incidence         Incidence        @relation(fields: [incidenceId], references: [id])
+  incidenceId       String
+  user              User             @relation("AssignmentUser", fields: [userId], references: [id])
+  userId            String
+  assigner          User?            @relation("AssignmentAssigner", fields: [assignerId], references: [id])
+  assignerId        String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+}
+
+model Camera {
+  id                String           @id @default(uuid())
+  name              String           @unique
+  direction         String
+  address           String
+  geometry          Json
+  cameraType        String
+  megaphone         Boolean          @default(false)
+  panicButton       Boolean          @default(false)
+  cameraMunicipal   Boolean          @default(false)
+  reference         Json
+  jurisdiction      Jurisdiction     @relation(fields: [jurisdictionId], references: [id])
+  jurisdictionId    String
+  user              User             @relation(fields: [userId], references: [id])
+  userId            String
+  records           Record[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+}
+
+model Communication {
+  id                String           @id @default(uuid())
+  name              String           @unique
+  description       String
+  incidences        Incidence[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+}
+
+model Crime {
+  id                String           @id @default(uuid())
+  name              String           @unique
+  description       String
+  incidences        Incidence[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+}
+
+model Evidence {
+  id                String           @id @default(uuid())
+  path              String
+  originalName      String
+  mimeType          String
+  size              Int
+  record            Record           @relation(fields: [recordId], references: [id])
+  recordId          String
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+}
+
+model Incidence {
+  id                String           @id @default(uuid())
+  code              String?          @unique
+  name              String
+  description       String?
+  latitude          String?
+  longitude         String?
+  date              DateTime
+  status            Status           @default(process)
+  observation       String?
+  communication     Communication    @relation(fields: [communicationId], references: [id])
+  communicationId   String
+  crime             Crime            @relation(fields: [crimeId], references: [id])
+  crimeId           String
+  user              User             @relation("IncidenceUser", fields: [userId], references: [id])
+  userId            String
+  userEnd           User?            @relation("IncidenceUserUpdate", fields: [userWhoUpdated],references: [id])
+  userWhoUpdated    String?
+  zone              Zone             @relation(fields: [zoneId], references: [id])
+  zoneId            String
+  assignments       Assignment[]
+  records           Record[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+}
+
+model Jurisdiction {
+  id                String           @id @default(uuid())
+  name              String           @unique
+  description       String
+  color             String
+  geometry          Json
+  zone              Zone             @relation(fields: [zoneId], references: [id])
+  zoneId            String
+  cameras           Camera[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?     
+}
+
+model Record {
+  id                String           @id @default(uuid())
+  description       String?
+  date              DateTime
+  camera            Camera           @relation(fields: [cameraId], references: [id])
+  cameraId          String
+  incidence         Incidence        @relation(fields: [incidenceId], references: [id])
+  incidenceId       String
+  user              User             @relation(fields: [userId], references: [id])
+  userId            String
+  evidences         Evidence[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?  
+}
+
+model User {
+  id                String           @id @default(uuid())
+  username          String           @unique
+  password          String
+  role              Role
+  name              String
+  lastname          String
+  phone             String?
+  dni               String?
+  assignments       Assignment[]     @relation("AssignmentUser")
+  assignedUsers     Assignment[]     @relation("AssignmentAssigner")
+  cameras           Camera[]
+  incidences        Incidence[]      @relation("IncidenceUser")
+  incidenceEnds     Incidence[]      @relation("IncidenceUserUpdate")
+  records           Record[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+}
+
+model Zone {
+  id                String           @id @default(uuid())
+  name              String           @unique
+  description       String
+  incidences        Incidence[]
+  jurisdictions     Jurisdiction[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+}
