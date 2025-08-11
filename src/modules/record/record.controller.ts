@@ -64,7 +64,7 @@ export class RecordController {
     return this.recordService.delete(id);
   }
 
-  @Delete('delete/file/:id')
+  @Delete('delete/evidence/:id')
   deleteFile(@Param('id', ParseUUIDPipe) id: string) {
     return this.evidenceService.delete(id);
   }

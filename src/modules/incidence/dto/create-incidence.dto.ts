@@ -20,8 +20,8 @@ export class CreateIncidenceDto {
     example: 'Reporte de evento en Zona A',
     description: 'Nombre de la incidencia',
   })
-  @IsNotEmpty()
-  name: string;
+  @IsOptional()
+  name?: string;
 
   @ApiProperty({
     example: 'Descripcion opcional',
