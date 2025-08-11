@@ -12,6 +12,7 @@ enum Role {
   supervisor
   operator
   hunter
+  validator
 }
 
 enum Status {
@@ -90,7 +91,7 @@ model Evidence {
 model Incidence {
   id                String           @id @default(uuid())
   code              String?          @unique
-  name              String
+  name              String?
   description       String?
   latitude          String?
   longitude         String?

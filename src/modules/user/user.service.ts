@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma, Role, User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CreateUserDto, FilterUserDto } from './dto';
+import { CreateUserDto, FilterUserDto, UpdateUserDto } from './dto';
 import { paginationHelper } from '../../common/helpers';
 
 @Injectable()
@@ -9,9 +10,15 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateUserDto, role: Role): Promise<User> {
-    return await this.prisma.user.create({
-      data: { ...dto, role },
+    const { password, ...res } = dto;
+    const user = await this.prisma.user.create({
+      data: {
+        ...res,
+        password: bcrypt.hashSync(password, 10),
+        role,
+      },
     });
+    return await this.findOne(user.id);
   }
 
   async findAll(dto: FilterUserDto, role: Role): Promise<any> {
@@ -45,8 +52,15 @@ export class UserService {
     return await this.getUserById(id);
   }
 
-  async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
+  async update(id: string, dto: UpdateUserDto): Promise<User> {
+    const { password, ...res } = dto;
     await this.getUserById(id);
+    const data = password
+      ? {
+          password: bcrypt.hashSync(password, 10),
+          ...res,
+        }
+      : { ...res };
     return this.prisma.user.update({
       data,
       where: { id },
