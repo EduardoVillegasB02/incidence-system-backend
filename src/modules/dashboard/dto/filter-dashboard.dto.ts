@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 import { PaginationDto } from '../../../common/dto';
-import { UserType } from '../../../common/enums';
+import { Range, UserType } from '../../../common/enums';
 
 export class FilterDashboardDto extends PaginationDto {
   @ApiProperty({
@@ -12,7 +12,7 @@ export class FilterDashboardDto extends PaginationDto {
   })
   @IsOptional()
   @IsEnum(UserType)
-  userType: string;
+  userType: UserType;
 
   @ApiProperty({
     description: 'Fecha de inicio del rango',
@@ -40,4 +40,13 @@ export class FilterDashboardDto extends PaginationDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiProperty({
+    description: 'Rango',
+    example: Range.week,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(Range)
+  range?: Range;
 }

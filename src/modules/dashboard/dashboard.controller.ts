@@ -26,6 +26,6 @@ export class DashboardController {
 
   @Get('trends')
   trends(@Query() filters: FilterDashboardDto) {
-    return this.dashboardService.getTrends(filters);
+    return this.dashboardService.getTrendsReal(filters);
   }
 }
