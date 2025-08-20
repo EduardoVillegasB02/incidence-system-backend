@@ -5,8 +5,8 @@ export function perfomanceUser(filters: FilterDashboardDto, users: any[]) {
   const { start, end } = filters;
   return users.map((user) => {
     const validAssignments = user.assignments
-      .filter((a) => a.deletedAt === null)
-      .filter((a) => {
+      .filter((a: any) => a.deletedAt === null)
+      .filter((a: any) => {
         const date = a.incidence?.date;
         if (!date) return false;
         const d = new Date(date);
@@ -15,7 +15,7 @@ export function perfomanceUser(filters: FilterDashboardDto, users: any[]) {
         return afterStart && beforeEnd;
       });
     const finished = validAssignments.filter(
-      (a) => a.incidence?.status === 'finished',
+      (a: any) => a.incidence?.status === 'finished',
     ).length;
     return {
       id: user.id,
