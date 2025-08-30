@@ -34,7 +34,7 @@ export class RecordService {
       true,
     );
     await getIncidencesByAssign(this.prisma, role, userId, incidence.id);
-    await this.cameraService.findOne(dto.cameraId);
+    if (dto.cameraId) await this.cameraService.findOne(dto.cameraId);
     const record = await this.prisma.record.create({
       data: { ...dto, userId },
     });

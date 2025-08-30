@@ -24,8 +24,9 @@ export class CreateRecordDto {
     description: 'Camera id of the record',
     required: false,
   })
+  @IsOptional()
   @IsUUID()
-  cameraId: string;
+  cameraId?: string;
 
   @ApiProperty({
     example: 'cb624b5d-a6e9-42cf-9396-e1ecfef30f9c',

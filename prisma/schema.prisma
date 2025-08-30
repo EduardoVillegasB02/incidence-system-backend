@@ -134,8 +134,8 @@ model Record {
   id                String           @id @default(uuid())
   description       String?
   date              DateTime
-  camera            Camera           @relation(fields: [cameraId], references: [id])
-  cameraId          String
+  camera            Camera?          @relation(fields: [cameraId], references: [id])
+  cameraId          String?
   incidence         Incidence        @relation(fields: [incidenceId], references: [id])
   incidenceId       String
   user              User             @relation(fields: [userId], references: [id])
