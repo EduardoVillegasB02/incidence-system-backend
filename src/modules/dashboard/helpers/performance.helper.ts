@@ -1,4 +1,3 @@
-import { Role, User } from '@prisma/client';
 import { FilterDashboardDto } from '../dto';
 
 export function perfomanceUser(filters: FilterDashboardDto, users: any[]) {
@@ -15,7 +14,9 @@ export function perfomanceUser(filters: FilterDashboardDto, users: any[]) {
         return afterStart && beforeEnd;
       });
     const finished = validAssignments.filter(
-      (a: any) => a.incidence?.status === 'finished',
+      (a: any) =>
+        a.incidence?.status === 'finished' ||
+        a.incidence?.status === 'completed',
     ).length;
     return {
       id: user.id,
