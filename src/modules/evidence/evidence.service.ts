@@ -12,6 +12,7 @@ import {
   deleteFile,
   generateDirectory,
   generateFilename,
+  getResolvedFilePath,
 } from '../../common/helpers';
 
 @Injectable()
@@ -21,7 +22,7 @@ export class EvidenceService {
     private prisma: PrismaService,
   ) {}
 
-  async create(files: Express.Multer.File[], recordId: string) {
+  async create(files: Express.Multer.File[], recordId: string): Promise<any> {
     const { currentDate, uploadDir } = generateDirectory(this.configService);
     const dataToCreate = files.map((file) => {
       const uniqueName = generateFilename(file.originalname);
@@ -40,7 +41,11 @@ export class EvidenceService {
     });
   }
 
-  async delete(id: string) {
+  getFile(path: string[] | string): string {
+    return getResolvedFilePath(this.configService, path);
+  }
+
+  async delete(id: string): Promise<any> {
     const evidence = await this.getEvidenceById(id);
     if (evidence.record.incidence.status != Status.process)
       throw new ConflictException(

@@ -25,7 +25,7 @@ export function buildWhereIncidence(
     where.date = {
       lte: new Date(`${end}T23:59:59`),
     };
-  if (incidencesId) where.incidenceId = { in: incidencesId };
+  if (incidencesId) where.id = { in: incidencesId };
   if (status) where.status = status;
   return where;
 }
@@ -34,9 +34,12 @@ export const includeIncidence = {
   communication: true,
   crime: true,
   records: {
+    where: { deletedAt: null },
     include: {
       camera: true,
-      evidences: true,
+      evidences: {
+        where: { deletedAt: null }
+      },
       user: true,
     },
   },

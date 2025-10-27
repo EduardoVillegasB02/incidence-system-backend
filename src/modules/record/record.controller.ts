@@ -18,7 +18,7 @@ import { RecordService } from './record.service';
 import { CreateRecordDto, UpdateRecordDto } from './dto';
 import { EvidenceService } from '../evidence/evidence.service';
 import { PaginationDto } from '../../common/dto';
-import { JwtAuthGuard, RolesGuard } from '../../auth/guard';
+import { JwtAuthGuard, Roles , RolesGuard} from '../../auth/guard';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('record')
@@ -28,6 +28,7 @@ export class RecordController {
     private readonly evidenceService: EvidenceService,
   ) {}
 
+  @Roles('administrator', 'supervisor', 'operator', 'hunter', 'validator')
   @Post('add')
   @UseInterceptors(FilesInterceptor('files', 5))
   create(
@@ -48,7 +49,7 @@ export class RecordController {
     return this.recordService.findOne(id);
   }
 
-  @Patch('update/:id')
+  @Patch(':id')
   @UseInterceptors(FilesInterceptor('files', 5))
   update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -64,7 +65,7 @@ export class RecordController {
     return this.recordService.delete(id);
   }
 
-  @Delete('delete/file/:id')
+  @Delete('delete/evidence/:id')
   deleteFile(@Param('id', ParseUUIDPipe) id: string) {
     return this.evidenceService.delete(id);
   }

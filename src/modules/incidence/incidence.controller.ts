@@ -17,23 +17,26 @@ import {
   FilterIncidenceDto,
   UpdateIncidenceDto,
 } from './dto';
-import { JwtAuthGuard, RolesGuard } from '../../auth/guard';
+import { JwtAuthGuard, Roles, RolesGuard } from '../../auth/guard';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('incidence')
 export class IncidenceController {
   constructor(private readonly incidenceService: IncidenceService) {}
 
+  @Roles('administrator', 'supervisor', 'operator', 'hunter', 'validator')
   @Post('add')
   create(@Body() dto: CreateIncidenceDto, @Req() req: any) {
     return this.incidenceService.create(dto, req.user);
   }
 
+  @Roles('administrator', 'supervisor', 'operator', 'hunter', 'visualizer')
   @Get('all')
   findAllB(@Query() filters: FilterIncidenceDto, @Req() req: any) {
-    return this.incidenceService.findAll(filters, req);
+    return this.incidenceService.findAll(filters, req.user);
   }
 
+  @Roles('administrator', 'supervisor', 'operator', 'hunter', 'visualizer')
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string, @Req() req: any) {
     return this.incidenceService.findOne(id, req.user);

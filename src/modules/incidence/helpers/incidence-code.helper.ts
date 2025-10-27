@@ -10,6 +10,7 @@ export async function validateCode(
     where: { code },
   });
   if (!incident) return;
+  if (code === incident.code) return;
   if (incident.deletedAt)
     throw new ConflictException(
       'This code belongs to a deleted incident. Please restore it or use a different one.',

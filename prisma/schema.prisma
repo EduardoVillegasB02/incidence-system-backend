@@ -12,6 +12,7 @@ enum Role {
   supervisor
   operator
   hunter
+  validator
 }
 
 enum Status {
@@ -90,13 +91,14 @@ model Evidence {
 model Incidence {
   id                String           @id @default(uuid())
   code              String?          @unique
-  name              String
+  name              String?
   description       String?
   latitude          String?
   longitude         String?
   date              DateTime
   status            Status           @default(process)
   observation       String?
+  view              Boolean          @default(false)
   communication     Communication    @relation(fields: [communicationId], references: [id])
   communicationId   String
   crime             Crime            @relation(fields: [crimeId], references: [id])
@@ -132,8 +134,8 @@ model Record {
   id                String           @id @default(uuid())
   description       String?
   date              DateTime
-  camera            Camera           @relation(fields: [cameraId], references: [id])
-  cameraId          String
+  camera            Camera?          @relation(fields: [cameraId], references: [id])
+  cameraId          String?
   incidence         Incidence        @relation(fields: [incidenceId], references: [id])
   incidenceId       String
   user              User             @relation(fields: [userId], references: [id])

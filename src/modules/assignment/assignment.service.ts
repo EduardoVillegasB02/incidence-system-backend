@@ -4,6 +4,7 @@ import { CreateAssignmentDto } from './dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { IncidenceService } from '../incidence/incidence.service';
 import { UserService } from '../user/user.service';
+import { assignmentInclude } from './constants';
 
 @Injectable()
 export class AssignmentService {
@@ -27,19 +28,7 @@ export class AssignmentService {
   async findAllByIncidence(incidenceId: string): Promise<Assignment[]> {
     return await this.prisma.assignment.findMany({
       where: { incidenceId, deletedAt: null },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            lastname: true,
-            dni: true,
-            phone: true,
-            username: true,
-            role: true,
-          },
-        },
-      },
+      include: assignmentInclude,
       orderBy: { user: { lastname: 'asc' } },
     });
   }

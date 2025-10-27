@@ -8,24 +8,9 @@ import { JwtAuthGuard, Roles, RolesGuard } from '../../auth/guard';
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
-  @Roles('administrator', 'supervisor')
+  @Roles('administrator', 'supervisor', 'visualizer')
   @Get()
   statistics(@Query() filters: FilterDashboardDto) {
     return this.dashboardService.getStatistics(filters);
-  }
-
-  @Get('general')
-  general(@Query() filters: FilterDashboardDto) {
-    return this.dashboardService.getGeneral(filters);
-  }
-
-  @Get('performance')
-  performance(@Query() filters: FilterDashboardDto) {
-    return this.dashboardService.getPerformance(filters);
-  }
-
-  @Get('trends')
-  trends(@Query() filters: FilterDashboardDto) {
-    return this.dashboardService.getTrends(filters);
   }
 }

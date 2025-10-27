@@ -24,6 +24,7 @@ export class CommunicationController {
     return this.communicationService.create(dto);
   }
 
+  @Roles('administrator', 'supervisor', 'operator', 'hunter', 'visualizer')
   @Get('all')
   findAll() {
     return this.communicationService.findAll();

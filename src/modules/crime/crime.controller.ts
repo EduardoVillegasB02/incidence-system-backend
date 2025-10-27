@@ -24,6 +24,7 @@ export class CrimeController {
     return this.crimeService.create(dto);
   }
 
+  @Roles('administrator', 'supervisor', 'operator', 'hunter', 'visualizer')
   @Get('all')
   findAll() {
     return this.crimeService.findAll();
