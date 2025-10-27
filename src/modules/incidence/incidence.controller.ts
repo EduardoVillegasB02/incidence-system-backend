@@ -10,7 +10,9 @@ import {
   Req,
   UseGuards,
   ParseUUIDPipe,
+  ParseEnumPipe,
 } from '@nestjs/common';
+import { Status } from '@prisma/client';
 import { IncidenceService } from './incidence.service';
 import {
   CreateIncidenceDto,
@@ -32,7 +34,12 @@ export class IncidenceController {
 
   @Get('all')
   findAllB(@Query() filters: FilterIncidenceDto, @Req() req: any) {
-    return this.incidenceService.findAll(filters, req);
+    return this.incidenceService.findAll(filters, req.user);
+  }
+
+  @Get('map')
+  mapIncidences(@Query() filters: FilterIncidenceDto) {
+    return this.incidenceService.mapIncidences(filters);
   }
 
   @Get(':id')
@@ -52,5 +59,13 @@ export class IncidenceController {
   @Delete('delete/:id')
   delete(@Param('id', ParseUUIDPipe) id: string) {
     return this.incidenceService.delete(id);
+  }
+
+  @Patch('status/:id')
+  changeStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body('status', new ParseEnumPipe(Status)) status: Status,
+  ) {
+    return this.incidenceService.changeStatus(id, status);
   }
 }

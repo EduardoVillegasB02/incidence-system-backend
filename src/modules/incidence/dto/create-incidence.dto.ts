@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsDateString,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
@@ -76,9 +77,35 @@ export class CreateIncidenceDto {
 
   @ApiProperty({
     example: '3a0210a8-f1db-45d9-b007-ce5adca50426',
+    description: 'jurisdiction id of the record',
+  })
+  @IsOptional()
+  @IsUUID()
+  jurisdictionId?: string;
+
+  @ApiProperty({
+    example: '3a0210a8-f1db-45d9-b007-ce5adca50426',
     description: 'zone id of the record',
   })
   @IsNotEmpty()
   @IsUUID()
   zoneId: string;
+
+  @ApiProperty({
+    example: -12.046374,
+    description: 'Latitude of the posible home location',
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  homeLatitude?: number;
+
+  @ApiProperty({
+    example: -77.042793,
+    description: 'Longitude of the posible home location',
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  homeLongitude?: number;
 }

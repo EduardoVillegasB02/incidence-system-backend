@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Assignment, User } from '@prisma/client';
+import { Assignment, Status, User } from '@prisma/client';
 import { CreateAssignmentDto } from './dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { IncidenceService } from '../incidence/incidence.service';
@@ -20,6 +20,7 @@ export class AssignmentService {
     const user = await this.verifyFields(incidenceId, userId);
     if (userType !== user.role)
       throw new BadRequestException(`You need to assign a ${user.role}`);
+    await this.verifyCount(userId);
     return await this.prisma.assignment.create({
       data: { assignerId, incidenceId, userId },
     });
@@ -69,5 +70,18 @@ export class AssignmentService {
         'The user is already assigned to this incident',
       );
     return user;
+  }
+
+  private async verifyCount(userId: string): Promise<void> {
+    const count = await this.prisma.assignment.count({
+      where: {
+        userId,
+        incidence: { deletedAt: null, status: { not: Status.finished } },
+      },
+    });
+    if (count > 4)
+      throw new BadRequestException(
+        'A user can only be assigned to a maximum of 5 active incidences.',
+      );
   }
 }

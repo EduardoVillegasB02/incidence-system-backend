@@ -18,6 +18,7 @@ import { SupervisorModule } from './modules/supervisor/supervisor.module';
 import { UserModule } from './modules/user/user.module';
 import { ZoneModule } from './modules/zone/zone.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { MapModule } from './modules/map/map.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     UserModule,
     ZoneModule,
     DashboardModule,
+    MapModule,
   ],
   controllers: [AppController],
   providers: [AppService],

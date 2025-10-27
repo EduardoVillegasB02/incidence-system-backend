@@ -6,16 +6,16 @@ export function whereDashboardIncidence(filters: FilterDashboardDto) {
   const where: any = { deletedAt: null };
   if (start && end)
     where.date = {
-      gte: new Date(`${start}T00:00:00`),
-      lte: new Date(`${end}T23:59:59`),
+      gte: new Date(`${start}T00:00:00.000Z`),
+      lte: new Date(`${end}T23:59:59.999Z`),
     };
   else if (start)
     where.date = {
-      gte: new Date(`${start}T00:00:00`),
+      gte: new Date(`${start}T00:00:00.000Z`),
     };
   else if (end)
     where.date = {
-      lte: new Date(`${end}T23:59:59`),
+      lte: new Date(`${end}T23:59:59.999Z`),
     };
   return where;
 }

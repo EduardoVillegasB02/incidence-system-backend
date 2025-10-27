@@ -16,6 +16,7 @@ enum Role {
 }
 
 enum Status {
+  previous
   process
   completed
   finished
@@ -69,6 +70,7 @@ model Crime {
   id                String           @id @default(uuid())
   name              String           @unique
   description       String
+  field             String?
   incidences        Incidence[]
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
@@ -96,16 +98,20 @@ model Incidence {
   latitude          String?
   longitude         String?
   date              DateTime
-  status            Status           @default(process)
+  status            Status           @default(previous)
   observation       String?
   view              Boolean          @default(false)
+  homeLatitude      Float?
+  homeLongitude     Float?
   communication     Communication    @relation(fields: [communicationId], references: [id])
   communicationId   String
   crime             Crime            @relation(fields: [crimeId], references: [id])
   crimeId           String
+  jurisdiction      Jurisdiction?    @relation(fields: [jurisdictionId], references: [id])
+  jurisdictionId    String?
   user              User             @relation("IncidenceUser", fields: [userId], references: [id])
   userId            String
-  userEnd           User?            @relation("IncidenceUserUpdate", fields: [userWhoUpdated],references: [id])
+  userEnd           User?            @relation("IncidenceUserUpdate", fields: [userWhoUpdated], references: [id])
   userWhoUpdated    String?
   zone              Zone             @relation(fields: [zoneId], references: [id])
   zoneId            String
@@ -125,6 +131,7 @@ model Jurisdiction {
   zone              Zone             @relation(fields: [zoneId], references: [id])
   zoneId            String
   cameras           Camera[]
+  incidences        Incidence[]
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
   deletedAt         DateTime?     

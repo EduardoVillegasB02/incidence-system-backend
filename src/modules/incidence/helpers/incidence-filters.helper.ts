@@ -2,7 +2,7 @@ import { FilterIncidenceDto } from '../dto';
 
 export function buildWhereIncidence(
   filters: FilterIncidenceDto,
-  incidencesId: string[],
+  incidencesId: string[] | null = null,
 ) {
   const { start, end, crimeIds, search, status } = filters;
   const where: any = { deletedAt: null };
@@ -37,7 +37,16 @@ export const includeIncidence = {
     include: {
       camera: true,
       evidences: true,
-      user: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          lastname: true,
+          dni: true,
+          phone: true,
+          username: true,
+        },
+      },
     },
   },
   user: {

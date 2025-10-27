@@ -51,7 +51,11 @@ export class RecordService {
         where,
         include: {
           camera: true,
-          evidences: true,
+          evidences: {
+            where: {
+              deletedAt: null,
+            }
+          },
           incidence: true,
           user: true,
         },

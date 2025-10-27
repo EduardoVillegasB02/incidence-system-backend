@@ -3,7 +3,7 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import { Incidence, Status } from '@prisma/client';
+import { Incidence, Role, Status } from '@prisma/client';
 import {
   CreateIncidenceDto,
   FilterIncidenceDto,
@@ -12,15 +12,18 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CommunicationService } from '../communication/communication.service';
 import { CrimeService } from '../crime/crime.service';
+import { JurisdictionService } from '../jurisdiction/jurisdiction.service';
 import { ZoneService } from '../zone/zone.service';
 import { paginationHelper } from '../../common/helpers';
 import {
   buildWhereIncidence,
+  buildUpdateByStatus,
   getIncidencesByAssign,
   includeIncidence,
   validateCode,
-  validateStatus,
+  validateNextStatus,
   verifyFields,
+  assignHunter,
 } from './helpers';
 
 @Injectable()
@@ -29,11 +32,12 @@ export class IncidenceService {
     private prisma: PrismaService,
     private communicationService: CommunicationService,
     private crimeService: CrimeService,
+    private jurisdictionService: JurisdictionService,
     private zoneService: ZoneService,
   ) {}
 
   async create(dto: CreateIncidenceDto, user: any): Promise<Incidence> {
-    const { userId } = user;
+    const { role, userId } = user;
     await this.communicationService.findOne(dto.communicationId);
     await this.crimeService.findOne(dto.crimeId);
     await this.zoneService.findOne(dto.zoneId);
@@ -41,13 +45,18 @@ export class IncidenceService {
     const incidence = await this.prisma.incidence.create({
       data: { ...dto, userId },
     });
+    let userAssigned: string = userId;
+    if (role === Role.validator) {
+      const id = await assignHunter(this.prisma);
+      userAssigned = id ? id : userId;
+    }
     await this.prisma.assignment.create({
-      data: { incidenceId: incidence.id, userId },
+      data: { incidenceId: incidence.id, userId: userAssigned },
     });
     return incidence;
   }
 
-  async findAll(filters: FilterIncidenceDto, user: any) {
+  async findAll(filters: FilterIncidenceDto, user: any): Promise<any> {
     const { role, userId } = user;
     const { page, limit } = filters;
     const incidencesId = await getIncidencesByAssign(this.prisma, role, userId);
@@ -63,42 +72,103 @@ export class IncidenceService {
     );
   }
 
-  async findOne(id: string, user: any) {
+  async findOne(id: string, user: any): Promise<Incidence> {
     const { role, userId } = user;
     const incidence = await this.getIncidenceById(id, true);
-    if (['hunter', 'operator'].includes(role)) {
+    /* if (['hunter', 'operator'].includes(role)) {
       const assignment = await this.prisma.assignment.findFirst({
         where: { incidenceId: id, userId },
       });
       if (!assignment)
         throw new ForbiddenException('You do not have access to this incident');
-    }
+    } */
     return incidence;
   }
 
-  async update(id: string, dto: UpdateIncidenceDto, user: any) {
+  async update(id: string, dto: UpdateIncidenceDto, user: any): Promise<any> {
     const { role, userId } = user;
-    const incidence = await this.getIncidenceById(id, false, true);
-    await verifyFields(dto, role);
-    await validateStatus(dto, incidence);
-    if (dto.communicationId)
-      await this.communicationService.findOne(dto.communicationId);
-    if (dto.crimeId) await this.crimeService.findOne(dto.crimeId);
-    if (dto.zoneId) await this.zoneService.findOne(dto.zoneId);
+    const { status } = await this.getIncidenceById(id, false);
+    //await verifyFields(dto, role);
+    const data = await buildUpdateByStatus(dto, status);
+    if (data.communicationId)
+      await this.communicationService.findOne(data.communicationId);
+    if (data.crimeId) await this.crimeService.findOne(data.crimeId);
+    if (data.jurisdictionId)
+      await this.jurisdictionService.findOne(data.jurisdictionId);
+    if (data.zoneId) await this.zoneService.findOne(data.zoneId);
     await validateCode(this.prisma, dto.code);
     await this.prisma.incidence.update({
-      data: { ...dto, userId },
+      data: { ...data, userWhoUpdated: userId },
       where: { id },
     });
     return await this.getIncidenceById(id, true);
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<any> {
     await this.getIncidenceById(id);
     return this.prisma.incidence.update({
       data: { deletedAt: new Date() },
       where: { id },
     });
+  }
+
+  async changeStatus(id: string, status: Status): Promise<any> {
+    const { code, status: previousStatus } = await this.getIncidenceById(id);
+    validateNextStatus(previousStatus, status, code);
+    await this.prisma.incidence.update({
+      data: { status },
+      where: { id },
+    });
+    return await this.getIncidenceById(id, true);
+  }
+
+  async mapIncidences(filters: FilterIncidenceDto): Promise<any> {
+    const locations: any = {
+      type: 'FeatureCollection',
+      name: 'possible_origin_location',
+      features: [],
+    };
+    const where = buildWhereIncidence(filters);
+    const incidences = await this.prisma.incidence.findMany({
+      select: {
+        name: true,
+        description: true,
+        date: true,
+        latitude: true,
+        longitude: true,
+        homeLatitude: true,
+        homeLongitude: true,
+        communication: {
+          select: { name: true },
+        },
+        crime: {
+          select: { name: true },
+        },
+      },
+      where,
+    });
+    incidences.map((inc) =>
+      locations.features.push({
+        type: 'Feature',
+        properties: {
+          name: inc.name,
+          description: inc.description,
+          communication: inc.communication.name,
+          crime: inc.crime.name,
+        },
+        geometry: {
+          type: 'Point',
+          coordinate: [Number(inc.latitude), Number(inc.longitude)],
+        },
+        origin: !inc.homeLatitude
+          ? null
+          : {
+              type: 'Point',
+              coordinates: [inc.homeLatitude, inc.homeLongitude],
+            },
+      }),
+    );
+    return locations;
   }
 
   async getIncidenceById(
