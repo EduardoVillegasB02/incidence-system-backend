@@ -34,7 +34,7 @@ export class RecordService {
       true,
     );
     await getIncidencesByAssign(this.prisma, role, userId, incidence.id);
-    await this.cameraService.findOne(dto.cameraId);
+    if (dto.cameraId) await this.cameraService.findOne(dto.cameraId);
     const record = await this.prisma.record.create({
       data: { ...dto, userId },
     });
@@ -44,14 +44,16 @@ export class RecordService {
 
   async findAll(pagination: PaginationQuery, user: any) {
     const { role, userId } = user;
-    const where: any = ['hunter', 'operator'].includes(role) ? { userId } : {};
+    const where: any = ['hunter', 'operator'].includes(role) ? { userId,deletedAt:null } : {deletedAt:null};
     return await paginationHelper(
       this.prisma.record,
       {
         where,
         include: {
           camera: true,
-          evidences: true,
+          evidences: {
+            where: { deletedAt: null }
+          },
           incidence: true,
           user: true,
         },
@@ -112,7 +114,9 @@ export class RecordService {
       where: { id },
       include: {
         camera: true,
-        evidences: true,
+        evidences: {
+          where: { deletedAt: null }
+        },
         incidence: true,
         user: true,
       },

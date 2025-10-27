@@ -36,6 +36,20 @@ export class CrimeService {
     });
   }
 
+  async getCrimesDashboard(): Promise<any> {
+    return await this.prisma.crime.findMany({
+      select: {
+        id: true,
+        field: true,
+      },
+      where: {
+        deletedAt: null,
+        field: { not: null },
+      },
+      orderBy: { field: 'asc' },
+    });
+  }
+
   private async getCrimeById(id: string): Promise<Crime> {
     const crime = await this.prisma.crime.findUnique({
       where: { id },

@@ -66,20 +66,20 @@ export class IncidenceService {
   async findOne(id: string, user: any) {
     const { role, userId } = user;
     const incidence = await this.getIncidenceById(id, true);
-    if (['hunter', 'operator'].includes(role)) {
-      const assignment = await this.prisma.assignment.findFirst({
-        where: { incidenceId: id, userId },
-      });
-      if (!assignment)
-        throw new ForbiddenException('You do not have access to this incident');
-    }
+    // if (['hunter', 'operator'].includes(role)) {
+    //   const assignment = await this.prisma.assignment.findFirst({
+    //     where: { incidenceId: id, userId },
+    //   });
+    //   if (!assignment)
+    //     throw new ForbiddenException('You do not have access to this incident');
+    // }
     return incidence;
   }
 
   async update(id: string, dto: UpdateIncidenceDto, user: any) {
     const { role, userId } = user;
-    const incidence = await this.getIncidenceById(id, false, true);
-    await verifyFields(dto, role);
+    const incidence = await this.getIncidenceById(id, false);
+    //await verifyFields(dto, role);
     await validateStatus(dto, incidence);
     if (dto.communicationId)
       await this.communicationService.findOne(dto.communicationId);

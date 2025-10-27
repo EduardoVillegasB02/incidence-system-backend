@@ -30,11 +30,13 @@ export class IncidenceController {
     return this.incidenceService.create(dto, req.user);
   }
 
+  @Roles('administrator', 'supervisor', 'operator', 'hunter', 'visualizer')
   @Get('all')
   findAllB(@Query() filters: FilterIncidenceDto, @Req() req: any) {
-    return this.incidenceService.findAll(filters, req);
+    return this.incidenceService.findAll(filters, req.user);
   }
 
+  @Roles('administrator', 'supervisor', 'operator', 'hunter', 'visualizer')
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string, @Req() req: any) {
     return this.incidenceService.findOne(id, req.user);
