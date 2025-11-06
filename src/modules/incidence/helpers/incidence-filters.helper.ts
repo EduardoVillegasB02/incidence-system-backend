@@ -10,6 +10,7 @@ export function buildWhereIncidence(
     where.OR = [
       { code: { contains: search, mode: 'insensitive' } },
       { name: { contains: search, mode: 'insensitive' } },
+      { plate: { contains: search, mode: 'insensitive' } },
     ];
   if (crimeIds && crimeIds.length) where.crimeId = { in: crimeIds };
   if (start && end)
