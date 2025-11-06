@@ -59,6 +59,16 @@ export class CreateIncidenceDto {
   longitude?: string;
 
   @ApiProperty({
+    example: 'ABC123',
+    description: 'Placa',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  plate?: string;
+
+  @ApiProperty({
     example: '3a0210a8-f1db-45d9-b007-ce5adca50426',
     description: 'communication id of the record',
   })

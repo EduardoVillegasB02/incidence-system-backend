@@ -17,6 +17,7 @@ enum Role {
 }
 
 enum Status {
+  previous
   process
   completed
   finished
@@ -97,6 +98,7 @@ model Incidence {
   description       String?
   latitude          String?
   longitude         String?
+  plate             String?
   date              DateTime
   status            Status           @default(process)
   observation       String?
